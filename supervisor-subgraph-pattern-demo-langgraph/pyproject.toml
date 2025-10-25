@@ -1,0 +1,12 @@
+[project]
+name = "supervisor-subgraph-pattern-demo-langgraph"
+version = "0.1.0"
+description = "Customer Support System with Subgraphs - LangGraph Demo"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=0.2.62",
+    "langchain-openai>=0.2.14",
+    "langchain-core>=0.3.28",
+    "python-dotenv>=1.0.0",
+]

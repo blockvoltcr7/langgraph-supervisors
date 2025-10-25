@@ -1,0 +1,703 @@
+# Limitless OS - Tools API Specification
+# Complete tool definitions for LangGraph agents
+
+version: "1.0"
+description: "Tool specifications for Limitless OS sales agents"
+
+# =============================================================================
+# STATE MANAGEMENT TOOLS
+# =============================================================================
+
+update_stage:
+  name: "update_stage"
+  description: "Update the current conversation stage"
+  category: "state_management"
+  
+  parameters:
+    new_stage:
+      type: "string"
+      required: true
+      enum: ["greeting", "qualification", "pitch", "objection", "closing", "followup", "complete", "nurture"]
+      description: "The new stage to transition to"
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      previous_stage: "string"
+      current_stage: "string"
+  
+  implementation_notes: |
+    - Updates state['current_stage']
+    - Appends previous stage to state['stage_history']
+    - Updates state['last_updated'] timestamp
+    - Logs transition for analytics
+
+# =============================================================================
+# GREETER AGENT TOOLS
+# =============================================================================
+
+check_niche_fit:
+  name: "check_niche_fit"
+  description: "Determine if lead is in target niche (health/fitness/wellness/mindset)"
+  category: "qualification"
+  agent: "greeter_agent"
+  
+  parameters:
+    lead_response:
+      type: "string"
+      required: true
+      description: "Lead's answer to niche question"
+  
+  returns:
+    type: "object"
+    properties:
+      niche_fit: "boolean"
+      niche_type: "string | null"  # "health", "fitness", "wellness", "mindset", or null
+      confidence: "float"  # 0.0 to 1.0
+  
+  implementation_notes: |
+    - Use LLM or keyword matching to classify niche
+    - Keywords: health, fitness, wellness, mindset, nutrition, yoga, personal training, etc.
+    - Store result in state['niche_fit']
+    - If false, route to nurture
+
+# =============================================================================
+# QUALIFIER AGENT TOOLS
+# =============================================================================
+
+store_qualification_answer:
+  name: "store_qualification_answer"
+  description: "Store answer to a qualification question in state"
+  category: "qualification"
+  agent: "qualifier_agent"
+  
+  parameters:
+    question_number:
+      type: "integer"
+      required: true
+      min: 1
+      max: 5
+      description: "Which qualification question (1-5)"
+    
+    answer:
+      type: "string"
+      required: true
+      description: "Lead's answer to the question"
+    
+    parsed_data:
+      type: "object"
+      required: false
+      description: "Structured data extracted from answer"
+      properties:
+        business_type: "string | null"
+        monthly_revenue: "string | null"
+        lead_source: "string | null"
+        pain_point: "string | null"
+        ready_to_invest: "boolean | null"
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      questions_asked: "integer"
+      next_question: "string | null"
+  
+  implementation_notes: |
+    - Increment state['questions_asked']
+    - Store answer in state based on question_number:
+      Q1 → state['business_type']
+      Q2 → state['monthly_revenue']
+      Q3 → state['lead_source']
+      Q4 → state['main_pain_point']
+      Q5 → state['ready_to_invest']
+    - Return next question if questions_asked < 5
+
+calculate_qualification_score:
+  name: "calculate_qualification_score"
+  description: "Calculate qualification score based on all answers"
+  category: "qualification"
+  agent: "qualifier_agent"
+  
+  parameters: {}  # Uses current state
+  
+  returns:
+    type: "object"
+    properties:
+      qualification_score: "float"  # 0.0 to 1.0
+      qualified: "boolean"
+      pitch_type: "string"  # "warm", "cold", or "none"
+      breakdown:
+        type: "object"
+        properties:
+          niche_score: "float"
+          revenue_score: "float"
+          pain_point_score: "float"
+          readiness_score: "float"
+  
+  scoring_logic: |
+    Niche Match (0.3 points):
+    - Health/Fitness/Wellness/Mindset: 0.3
+    - Adjacent (business coach, etc.): 0.1
+    - Other: 0.0
+    
+    Revenue Range (0.3 points):
+    - $3K-$10K: 0.3
+    - $1K-$3K or $10K-$20K: 0.2
+    - Under $1K or Over $20K: 0.1
+    
+    Pain Point (0.2 points):
+    - Clear & aligned (tech, leads, admin): 0.2
+    - Vague: 0.1
+    - None or unrelated: 0.0
+    
+    Readiness (0.2 points):
+    - Ready now: 0.2
+    - Maybe later: 0.1
+    - Just looking: 0.0
+    
+    TOTAL SCORE: 0.0 to 1.0
+    
+    Qualification Thresholds:
+    - >= 0.7: QUALIFIED (warm pitch)
+    - 0.4-0.7: MAYBE QUALIFIED (cold pitch)
+    - < 0.4: NOT QUALIFIED (nurture)
+  
+  implementation_notes: |
+    - Updates state['qualification_score']
+    - Updates state['qualified'] boolean
+    - Updates state['pitch_type']
+    - Triggers transition to appropriate next stage
+
+search_knowledge_base:
+  name: "search_knowledge_base"
+  description: "Search uploaded documents via RAG for relevant context"
+  category: "rag"
+  agent: "all_agents"
+  
+  parameters:
+    query:
+      type: "string"
+      required: true
+      description: "Search query (e.g., 'objection about price', 'warm pitch template')"
+    
+    top_k:
+      type: "integer"
+      required: false
+      default: 3
+      description: "Number of results to return"
+    
+    filter:
+      type: "object"
+      required: false
+      description: "Filter by document type or category"
+      properties:
+        document_type: "string | null"  # "pitch", "objection", "faq", etc.
+        min_similarity: "float"  # 0.0 to 1.0
+  
+  returns:
+    type: "object"
+    properties:
+      results:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            content: "string"
+            similarity: "float"
+            document_id: "string"
+            metadata: "object"
+  
+  implementation_notes: |
+    - Query Supabase pgvector for embeddings
+    - Use text-embedding-3-small model
+    - Return top_k most similar chunks
+    - Used by agents to retrieve context for responses
+    - Example: Pitcher searches "warm pitch for fitness coach"
+
+# =============================================================================
+# PITCHER AGENT TOOLS
+# =============================================================================
+
+get_personalized_pitch:
+  name: "get_personalized_pitch"
+  description: "Generate personalized pitch based on qualification data"
+  category: "pitch"
+  agent: "pitcher_agent"
+  
+  parameters:
+    pitch_type:
+      type: "string"
+      required: true
+      enum: ["warm", "cold"]
+      description: "Type of pitch to deliver"
+  
+  returns:
+    type: "object"
+    properties:
+      pitch_text: "string"
+      personalization_data:
+        type: "object"
+        properties:
+          business_type: "string"
+          pain_point: "string"
+          revenue: "string"
+      rag_sources: "array"  # Source documents used
+  
+  implementation_notes: |
+    - Calls search_knowledge_base with pitch_type
+    - Retrieves pitch template from RAG
+    - Personalizes using state data:
+      - business_type
+      - main_pain_point
+      - monthly_revenue
+    - Returns formatted pitch ready to send
+    - Tracks sources for transparency
+
+mark_pitch_delivered:
+  name: "mark_pitch_delivered"
+  description: "Mark that pitch has been delivered to lead"
+  category: "state_management"
+  agent: "pitcher_agent"
+  
+  parameters:
+    pitch_type:
+      type: "string"
+      required: true
+      enum: ["warm", "cold"]
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      pitch_delivered: "boolean"
+      pitch_type: "string"
+  
+  implementation_notes: |
+    - Updates state['pitch_delivered'] = true
+    - Updates state['pitch_type']
+    - Updates state['last_updated']
+
+# =============================================================================
+# OBJECTION HANDLER AGENT TOOLS
+# =============================================================================
+
+identify_objection:
+  name: "identify_objection"
+  description: "Classify the objection from lead's response"
+  category: "objection_handling"
+  agent: "objection_handler_agent"
+  
+  parameters:
+    lead_response:
+      type: "string"
+      required: true
+      description: "Lead's message containing objection"
+  
+  returns:
+    type: "object"
+    properties:
+      objection_type: "string"  # "price", "time", "past_failure", "tech_savvy", "think_about_it", "other"
+      confidence: "float"
+      keywords: "array"
+  
+  objection_classification:
+    - type: "price"
+      keywords: ["expensive", "too much", "can't afford", "cost", "price"]
+    - type: "time"
+      keywords: ["no time", "busy", "overwhelmed", "don't have time"]
+    - type: "past_failure"
+      keywords: ["tried before", "didn't work", "failed", "waste of money"]
+    - type: "tech_savvy"
+      keywords: ["not tech savvy", "not technical", "complicated", "confusing"]
+    - type: "think_about_it"
+      keywords: ["think about it", "consider", "let me sleep on it", "need time"]
+    - type: "other"
+      keywords: []
+  
+  implementation_notes: |
+    - Use LLM or keyword matching to classify
+    - Return most likely objection type
+    - Used to retrieve appropriate response from RAG
+
+record_objection:
+  name: "record_objection"
+  description: "Record objection in state for tracking"
+  category: "objection_handling"
+  agent: "objection_handler_agent"
+  
+  parameters:
+    objection_type:
+      type: "string"
+      required: true
+    
+    objection_text:
+      type: "string"
+      required: false
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      total_objections: "integer"
+  
+  implementation_notes: |
+    - Appends to state['objections_raised']
+    - Tracks count for analytics
+    - Used to prevent repeating handled objections
+
+mark_objection_handled:
+  name: "mark_objection_handled"
+  description: "Mark objection as successfully addressed"
+  category: "objection_handling"
+  agent: "objection_handler_agent"
+  
+  parameters:
+    objection_type:
+      type: "string"
+      required: true
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      objections_handled: "array"
+  
+  implementation_notes: |
+    - Appends to state['objections_handled']
+    - Checks if all objections are handled
+    - Triggers transition to closing if resolved
+
+# =============================================================================
+# CLOSER AGENT TOOLS
+# =============================================================================
+
+confirm_plan_choice:
+  name: "confirm_plan_choice"
+  description: "Confirm which pricing plan the lead selected"
+  category: "closing"
+  agent: "closer_agent"
+  
+  parameters:
+    lead_response:
+      type: "string"
+      required: true
+      description: "Lead's response indicating plan choice"
+  
+  returns:
+    type: "object"
+    properties:
+      plan_chosen: "string"  # "option1", "option2", or "undecided"
+      confidence: "float"
+  
+  plan_detection:
+    option1_keywords: ["297", "997", "option 1", "first option", "upfront"]
+    option2_keywords: ["497", "option 2", "second option", "inclusive", "all-in"]
+  
+  implementation_notes: |
+    - Detect plan from lead's message
+    - Store in state['preferred_plan']
+    - If undecided, prompt for clarification
+
+create_stripe_link:
+  name: "create_stripe_link"
+  description: "Generate Stripe payment link for chosen plan"
+  category: "payment"
+  agent: "closer_agent"
+  
+  parameters:
+    plan:
+      type: "string"
+      required: true
+      enum: ["option1", "option2"]
+    
+    customer_data:
+      type: "object"
+      required: true
+      properties:
+        instagram_handle: "string"
+        email: "string | null"
+        campaign_code: "string"
+  
+  returns:
+    type: "object"
+    properties:
+      payment_link: "string"  # Stripe checkout URL
+      session_id: "string"
+      expires_at: "string"  # ISO 8601 timestamp
+  
+  stripe_products:
+    option1:
+      monthly_price_id: "price_xxx"  # $297/month
+      onetime_price_id: "price_yyy"  # $997 one-time
+    option2:
+      monthly_price_id: "price_zzz"  # $497/month
+  
+  implementation_notes: |
+    - Call Stripe API to create checkout session
+    - Include customer metadata (instagram_handle, campaign_code)
+    - Set success_url and cancel_url
+    - Link expires in 24 hours
+    - Webhook listens for payment completion
+
+send_payment_link:
+  name: "send_payment_link"
+  description: "Send payment link to lead via chat"
+  category: "closing"
+  agent: "closer_agent"
+  
+  parameters:
+    payment_link:
+      type: "string"
+      required: true
+    
+    plan:
+      type: "string"
+      required: true
+      enum: ["option1", "option2"]
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      message_sent: "boolean"
+  
+  implementation_notes: |
+    - Format message with link
+    - Include next steps (onboarding email, etc.)
+    - Update state['payment_link_sent'] = true
+
+mark_payment_link_sent:
+  name: "mark_payment_link_sent"
+  description: "Update state to reflect payment link sent"
+  category: "state_management"
+  agent: "closer_agent"
+  
+  parameters:
+    plan:
+      type: "string"
+      required: true
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+  
+  implementation_notes: |
+    - Updates state['payment_link_sent'] = true
+    - Updates state['preferred_plan']
+    - Triggers transition to complete stage
+
+trigger_onboarding_email:
+  name: "trigger_onboarding_email"
+  description: "Trigger onboarding email sequence (called after payment)"
+  category: "automation"
+  agent: "closer_agent"
+  
+  parameters:
+    customer_data:
+      type: "object"
+      required: true
+      properties:
+        instagram_handle: "string"
+        email: "string"
+        plan: "string"
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      email_scheduled: "boolean"
+  
+  implementation_notes: |
+    - Called via Stripe webhook on payment success
+    - Triggers welcome email with onboarding instructions
+    - Schedules follow-up emails (Day 1, 3, 7)
+    - Updates CRM status to "Customer"
+
+# =============================================================================
+# FOLLOW-UP AGENT TOOLS
+# =============================================================================
+
+get_followup_count:
+  name: "get_followup_count"
+  description: "Get number of follow-ups sent to this lead"
+  category: "state_management"
+  agent: "followup_agent"
+  
+  parameters: {}  # Uses current state
+  
+  returns:
+    type: "object"
+    properties:
+      followup_count: "integer"
+      last_followup_at: "string | null"  # ISO 8601 timestamp
+      days_since_last_message: "integer"
+  
+  implementation_notes: |
+    - Read from state['followup_count']
+    - Calculate days since state['last_message_at']
+    - Used to determine which follow-up to send
+
+send_followup_message:
+  name: "send_followup_message"
+  description: "Send follow-up message with appropriate urgency level"
+  category: "followup"
+  agent: "followup_agent"
+  
+  parameters:
+    followup_number:
+      type: "integer"
+      required: true
+      min: 1
+      max: 3
+      description: "Which follow-up (1, 2, or 3)"
+    
+    urgency_level:
+      type: "string"
+      required: true
+      enum: ["none", "soft", "strong"]
+  
+  returns:
+    type: "object"
+    properties:
+      message: "string"
+      rag_sources: "array"
+  
+  followup_templates:
+    day1:
+      urgency: "none"
+      template: "Just checking in - want to make sure you saw my last message..."
+    day3:
+      urgency: "soft"
+      template: "We're filling spots for this month's onboarding..."
+    day5:
+      urgency: "strong"
+      template: "Last call for this month's onboarding spots..."
+  
+  implementation_notes: |
+    - Retrieves template from RAG using search_knowledge_base
+    - Personalizes with state data
+    - Adds urgency based on followup_number
+
+increment_followup_count:
+  name: "increment_followup_count"
+  description: "Increment follow-up counter after sending message"
+  category: "state_management"
+  agent: "followup_agent"
+  
+  parameters: {}
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      followup_count: "integer"
+  
+  implementation_notes: |
+    - Increments state['followup_count']
+    - Updates state['last_followup_at']
+    - If followup_count >= 3, transition to nurture
+
+# =============================================================================
+# SHARED UTILITY TOOLS
+# =============================================================================
+
+get_current_state:
+  name: "get_current_state"
+  description: "Retrieve current conversation state"
+  category: "state_management"
+  agent: "all_agents"
+  
+  parameters: {}
+  
+  returns:
+    type: "object"
+    description: "Complete SalesConversationState object"
+  
+  implementation_notes: |
+    - Returns full state for debugging
+    - Used internally by agents
+
+log_event:
+  name: "log_event"
+  description: "Log event for analytics and debugging"
+  category: "observability"
+  agent: "all_agents"
+  
+  parameters:
+    event_type:
+      type: "string"
+      required: true
+      description: "Type of event (e.g., 'qualification_complete', 'objection_raised')"
+    
+    metadata:
+      type: "object"
+      required: false
+      description: "Additional event data"
+  
+  returns:
+    type: "object"
+    properties:
+      success: "boolean"
+      event_id: "string"
+  
+  implementation_notes: |
+    - Logs to analytics database
+    - Used for tracking conversions, drop-offs, etc.
+    - Integrates with LangSmith tracing
+
+# =============================================================================
+# TOOL EXECUTION CONFIGURATION
+# =============================================================================
+
+execution_config:
+  timeout: 30  # seconds
+  retry_on_failure: true
+  max_retries: 3
+  retry_delay: 2  # seconds
+  log_all_calls: true
+  cache_results: false  # Tools should not be cached
+
+# =============================================================================
+# ERROR HANDLING
+# =============================================================================
+
+error_handling:
+  on_tool_error:
+    action: "return_fallback"
+    fallback_message: "I'm having trouble processing that. Can you rephrase?"
+    log_error: true
+    notify_admin: false  # Only on critical errors
+  
+  on_rag_error:
+    action: "use_default_response"
+    log_error: true
+  
+  on_stripe_error:
+    action: "notify_human"
+    message: "I'm having trouble generating the payment link. Let me connect you with our team."
+
+# =============================================================================
+# NOTES
+# =============================================================================
+#
+# IMPLEMENTATION NOTES:
+# - All tools are async functions in Python
+# - Tools have access to current state via context
+# - RAG tools query Supabase pgvector
+# - Payment tools integrate with Stripe API
+# - State updates are atomic (checkpoint saved after each tool call)
+# - Tools are traced via LangSmith for debugging
+#
+# SECURITY:
+# - Stripe API keys stored in environment variables
+# - Payment links expire after 24 hours
+# - Customer data encrypted in transit and at rest
+# - Campaign codes validated before chat starts
+#
+# PERFORMANCE:
+# - RAG queries optimized with indexes
+# - Tool execution timeout: 30 seconds
+# - Cached embeddings for faster search
+# - Connection pooling for database queries
