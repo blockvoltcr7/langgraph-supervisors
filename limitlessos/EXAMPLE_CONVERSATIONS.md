@@ -8,10 +8,8 @@
 
 1. [Conversation 1: Ideal Path (Qualified → Warm Pitch → Immediate Close)](#conversation-1-ideal-path)
 2. [Conversation 2: With Objection (Qualified → Warm Pitch → Price Objection → Close)](#conversation-2-with-objection)
-3. [Conversation 3: Multiple Objections (Qualified → Cold Pitch → Multiple Objections → Follow-up)](#conversation-3-multiple-objections)
-4. [Conversation 4: Not Qualified (Wrong Niche → Nurture)](#conversation-4-not-qualified)
-5. [Conversation 5: Multi-Session Resume (Session 1 + Session 2)](#conversation-5-multi-session-resume)
-6. [Conversation 6: Follow-up Sequence (3-Day Follow-ups → Close)](#conversation-6-follow-up-sequence)
+3. [Conversation 3: Not Qualified (Wrong Niche → Nurture)](#conversation-3-not-qualified)
+4. [Conversation 4: Multi-Session Resume (Session 1 + Session 2)](#conversation-4-multi-session-resume)
 
 ---
 
@@ -210,95 +208,7 @@
 
 ---
 
-## Conversation 3: Multiple Objections
-**Qualified → Cold Pitch → Multiple Objections → Follow-up**
-
-### **Scenario**
-- Moderately qualified (score: 0.6)
-- Raises price AND time objections
-- Needs follow-up sequence
-
-### **Conversation Flow**
-
-**[... Greeting + Qualification completed (score: 0.6) ...]**
-
----
-
-**AI (Pitcher - Cold Pitch):**
-> You sound exactly like the coaches we help with Limitless OS. It's an all-in-one system that automates your coaching business from lead generation to onboarding — replacing 50+ tools and saving up to $2,500/month in software costs.
->
-> In 14 days, you'll have your high-converting funnel built, automations set up, and everything integrated into one platform. No tech skills needed — we do it all for you.
->
-> We have two simple options: **$297/month + a $997 one-time funnel build**, or **$497/month with the funnel build included**. Which one do you want to start with?
-
----
-
-**Lead:**
-> This sounds great but I'm already stretched thin. I don't think I have the time to set this up and honestly it's a bit more than I wanted to spend
-
-*[Tool Called: identify_objection → objection_type: "time, price"]*  
-*[Tool Called: record_objection(objection_type="time")]*  
-*[Tool Called: record_objection(objection_type="price")]*  
-*[Tool Called: update_stage → objection]*
-
----
-
-**AI (Objection Handler):**
-> I get both of those concerns. Here's the thing — you don't need time to set it up because we do everything for you. You just show up for onboarding, and within 14 days you have a fully automated business running. It's about saving you time, not taking more of it.
->
-> And on the cost side, you're already spending more than this each month on multiple tools that don't talk to each other. Limitless OS replaces all of them and saves you $2,500/month. Can I send you the payment link so we can lock your spot for this month's onboarding?
-
-*[Tool Called: search_knowledge_base(query="time objection")]*  
-*[Tool Called: search_knowledge_base(query="price objection")]*  
-*[Tool Called: mark_objection_handled(objection_type="time")]*  
-*[Tool Called: mark_objection_handled(objection_type="price")]*
-
----
-
-**Lead:**
-> I need to think about it
-
-*[Tool Called: update_stage → followup]*
-
----
-
-**AI (Follow-up):**
-> Of course — this is a big decision. What specifically do you need to think about? Is it the price, timing, or something else? Let me address that for you now.
-
----
-
-**Lead:**
-> I just need a day or two to think it over
-
----
-
-**AI (Follow-up):**
-> No problem. Just so you know, we're filling spots for this month's onboarding. If you want your funnel live by February 15th, we'd need to get started this week. I'll follow up with you in a couple of days.
-
-*[Tool Called: increment_followup_count]*
-
----
-
-### **State After Conversation**
-
-```json
-{
-  "current_stage": "followup",
-  "qualification_score": 0.6,
-  "pitch_delivered": true,
-  "pitch_type": "cold",
-  "objections_raised": ["time", "price"],
-  "objections_handled": ["time", "price"],
-  "followup_count": 1,
-  "payment_link_sent": false
-}
-```
-
-**→ System will automatically send Day 3 and Day 5 follow-ups**
-
----
-
-## Conversation 4: Not Qualified
+## Conversation 3: Not Qualified
 **Wrong Niche → Nurture**
 
 ### **Scenario**
@@ -340,7 +250,7 @@
 
 ---
 
-## Conversation 5: Multi-Session Resume
+## Conversation 4: Multi-Session Resume
 **Session 1 (Day 1) + Session 2 (Day 3) - Resume After 2 Days**
 
 ### **Scenario**
@@ -446,103 +356,6 @@
 - ✅ No questions repeated
 - ✅ Seamless experience for lead
 
----
-
-## Conversation 6: Follow-up Sequence
-**3-Day Follow-up Sequence → Close**
-
-### **Scenario**
-- Lead pitched, but said "need to think about it"
-- Receives 3 follow-ups over 5 days
-- Converts on Day 5 follow-up
-
----
-
-### **Day 1: Initial Pitch**
-
-**[... Qualification + Pitch delivered ...]**
-
----
-
-**Lead:**
-> I need to think about it
-
-*[State: followup_count=0, last_message_at="2025-01-15T14:00:00Z"]*
-
----
-
-### **Day 2: First Follow-up (24 hours later)**
-
-**[System automatically triggers followup_agent]**
-
----
-
-**AI (Follow-up Agent):**
-> Hey! Just checking in — want to make sure you saw my last message about Limitless OS. This could have you fully automated in 14 days. Any questions I can answer?
-
-*[Tool Called: send_followup_message(followup_number=1, urgency_level="none")]*  
-*[Tool Called: increment_followup_count → followup_count=1]*
-
----
-
-**[No response]**
-
----
-
-### **Day 4: Second Follow-up (72 hours after initial)**
-
----
-
-**AI (Follow-up Agent):**
-> We're filling spots for this month's onboarding. If you want to launch your funnel by February 15th, we should get you locked in now. Which plan works best for you — $297 + $997 build, or $497/month?
-
-*[Tool Called: send_followup_message(followup_number=2, urgency_level="soft")]*  
-*[Tool Called: increment_followup_count → followup_count=2]*
-
----
-
-**[No response]**
-
----
-
-### **Day 6: Final Follow-up (120 hours after initial)**
-
----
-
-**AI (Follow-up Agent):**
-> Last call for this month's onboarding spots — we're almost full. If you want to lock in your spot, I can send your link now.
-
-*[Tool Called: send_followup_message(followup_number=3, urgency_level="strong")]*  
-*[Tool Called: increment_followup_count → followup_count=3]*
-
----
-
-**Lead:**
-> Okay, let's do it. I'll take the $497 option.
-
-*[Tool Called: confirm_plan_choice → plan_chosen="option2"]*  
-*[Tool Called: update_stage → closing]*
-
----
-
-**AI (Closer):**
-> Awesome! I'm so glad you're ready. I'm sending you a secure Stripe payment link now. Welcome to Limitless OS!
->
-> [Payment Link: https://checkout.stripe.com/pay/xxx]
-
-*[Tool Called: create_stripe_link(plan="option2")]*  
-*[Tool Called: send_payment_link]*  
-*[Tool Called: update_stage → complete]*
-
----
-
-### **Key Takeaways**
-- ✅ 3 follow-ups over 5 days (not spammy)
-- ✅ Increasing urgency with each follow-up
-- ✅ System tracked followup_count automatically
-- ✅ Successful conversion on Day 6
-
----
 
 ## Expected Behavior Patterns
 

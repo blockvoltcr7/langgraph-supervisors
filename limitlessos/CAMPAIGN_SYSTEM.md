@@ -9,11 +9,10 @@
 The campaign system allows the owner to track lead sources and prevent unauthorized access to the AI sales agent.
 
 ### **Key Features**
-- ✅ Unique campaign codes for tracking
-- ✅ Embedded access codes in URL (no manual entry required)
-- ✅ Usage limits and expiration
-- ✅ Analytics per campaign
-- ✅ Protection from abuse
+- ✅ Unique campaign codes for tracking lead sources
+- ✅ Embedded codes in URL (no manual entry required)
+- ✅ Analytics per campaign (clicks, conversations, conversions)
+- ✅ Simple on/off activation
 
 ---
 
@@ -135,16 +134,6 @@ async function validateCampaign(code: string): Promise<ValidationResult> {
     return { valid: false, error: 'CAMPAIGN_INACTIVE' };
   }
   
-  // Check 3: Campaign not expired
-  if (campaign.expires_at && new Date() > campaign.expires_at) {
-    return { valid: false, error: 'CAMPAIGN_EXPIRED' };
-  }
-  
-  // Check 4: Usage limit not reached
-  if (campaign.max_uses && campaign.total_clicks >= campaign.max_uses) {
-    return { valid: false, error: 'CAMPAIGN_LIMIT_REACHED' };
-  }
-  
   return { valid: true, campaign };
 }
 ```
@@ -155,8 +144,6 @@ async function validateCampaign(code: string): Promise<ValidationResult> {
 |------------|---------|-------------|
 | `CAMPAIGN_NOT_FOUND` | "This link is invalid" | Contact support |
 | `CAMPAIGN_INACTIVE` | "This campaign is no longer active" | Contact owner |
-| `CAMPAIGN_EXPIRED` | "This link has expired" | Request new link |
-| `CAMPAIGN_LIMIT_REACHED` | "This campaign has reached its limit" | Request new link |
 
 ---
 
@@ -180,14 +167,9 @@ async function validateCampaign(code: string): Promise<ValidationResult> {
 │  │ coaches                        │  │
 │  └───────────────────────────────┘  │
 │                                     │
-│  Max Uses (optional)                │
+│  Platform (optional)                │
 │  ┌───────────────────────────────┐  │
-│  │ 100                           │  │
-│  └───────────────────────────────┘  │
-│                                     │
-│  Expires On (optional)              │
-│  ┌───────────────────────────────┐  │
-│  │ 2025-02-28                    │  │
+│  │ Instagram                     │  │
 │  └───────────────────────────────┘  │
 │                                     │
 │  [ Cancel ]  [ Create Campaign ]    │
@@ -377,13 +359,13 @@ function validateInstagramHandle(handle: string): boolean {
 
 ### **Use Cases**
 
-| Campaign Type | Example | Settings |
-|---------------|---------|----------|
-| **Time-Limited** | "Black Friday Sale" | expires_at: 2025-11-29 |
-| **Usage-Limited** | "First 50 Sign-Ups" | max_uses: 50 |
-| **Channel-Specific** | "Instagram Story Swipe-Up" | Unique code per channel |
-| **Evergreen** | "Website Link" | No limits |
-| **Testing** | "A/B Test Variant A" | Compare metrics |
+| Campaign Type | Example | Purpose |
+|---------------|---------|---------|
+| **Channel-Specific** | "Instagram Story Swipe-Up" | Track which platform drives leads |
+| **Time-Period** | "January 2025 Promo" | Track performance by month |
+| **Content-Specific** | "Reel #47 CTA" | Track which content converts |
+| **Evergreen** | "Website Link" | General access link |
+| **A/B Testing** | "Variant A vs Variant B" | Compare messaging/offers |
 
 ### **Best Practices**
 
@@ -408,23 +390,20 @@ Examples:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft: Owner creates
-    Draft --> Active: Owner activates
-    Active --> Paused: Owner pauses
-    Paused --> Active: Owner resumes
-    Active --> Expired: Expiration date reached
-    Active --> Completed: Max uses reached
-    Expired --> [*]
-    Completed --> [*]
+    [*] --> Active: Owner creates
+    Active --> Inactive: Owner deactivates
+    Inactive --> Active: Owner reactivates
     
     note right of Active
         Accepting new leads
         Tracking analytics
+        URL is accessible
     end note
     
-    note right of Paused
+    note right of Inactive
         Not accepting leads
         Analytics preserved
+        URL shows "inactive" message
     end note
 ```
 

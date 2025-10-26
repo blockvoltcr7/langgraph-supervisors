@@ -34,9 +34,6 @@ supervisor:
     - condition: "current_stage == 'closing' OR (pitch_delivered == true AND objections_handled)"
       route_to: "closer_agent"
       
-    - condition: "current_stage == 'followup'"
-      route_to: "followup_agent"
-      
     - condition: "current_stage == 'complete' OR current_stage == 'nurture'"
       route_to: "END"
       
@@ -331,71 +328,11 @@ closer_agent:
       next_stage: "complete"
       next_agent: "END"
     on_hesitation:
-      next_stage: "followup"
-      next_agent: "followup_agent"
+      # Without external contact info, mark as nurture if they don't commit
+      next_stage: "nurture"
+      next_agent: "END"
     on_error:
       next_agent: "closer_agent"  # Retry
-
-# =============================================================================
-# AGENT 6: FOLLOW-UP
-# =============================================================================
-
-followup_agent:
-  name: "Follow-up Agent"
-  type: "react_agent"
-  role: "Re-engage hesitant leads with urgency"
-  
-  system_prompt: |
-    You are the Follow-up Agent for Limitless OS.
-    
-    Your job is to:
-    1. Check how many follow-ups have been sent
-    2. Send appropriate follow-up message (Day 1, 3, or 5)
-    3. Add urgency messaging
-    4. Attempt to re-close
-    
-    FOLLOW-UP SCHEDULE:
-    - Day 1: Soft check-in, answer questions
-    - Day 3: Add urgency (spots filling), re-present options
-    - Day 5: Final call, strong urgency
-    
-    After 3 follow-ups → Move to nurture (don't spam)
-    
-    URGENCY LEVELS:
-    - Day 1: None (just checking in)
-    - Day 3: Soft ("spots filling quickly")
-    - Day 5: Strong ("last call for this month")
-    
-    GUIDELINES:
-    - Add value each time (not just "checking in")
-    - Use search_knowledge_base for follow-up templates
-    - Track follow-up count in state
-    - Re-attempt close after each follow-up
-    
-    EXAMPLE DAY 3:
-    "We're filling spots for this month's onboarding. If you want to launch your funnel by [date], we should get you locked in now. Which plan works best for you — $297 + $997 build, or $497/month?"
-  
-  tools:
-    - get_followup_count
-    - search_knowledge_base  # Get follow-up template
-    - send_followup_message
-    - increment_followup_count
-    - update_stage
-  
-  transitions:
-    on_re_engaged:
-      - condition: "lead_ready == true"
-        next_stage: "closing"
-        next_agent: "closer_agent"
-      - condition: "new_objection"
-        next_stage: "objection"
-        next_agent: "objection_handler_agent"
-    on_max_followups:
-      - condition: "followup_count >= 3"
-        next_stage: "nurture"
-        next_agent: "END"
-    on_error:
-      next_agent: "followup_agent"
 
 # =============================================================================
 # SHARED CONFIGURATION

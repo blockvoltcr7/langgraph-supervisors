@@ -38,7 +38,6 @@ graph TB
         I[Pitcher Agent]
         J[Objection Handler]
         K[Closer Agent]
-        L[Follow-up Agent]
     end
     
     subgraph "Persistence Layer"
@@ -64,14 +63,12 @@ graph TB
     F --> I
     F --> J
     F --> K
-    F --> L
     
     G --> N
     H --> N
     I --> N
     J --> N
     K --> N
-    L --> N
     
     N --> O
     O --> M
@@ -80,11 +77,6 @@ graph TB
     K --> Q
     
     F --> R
-    
-    style F fill:#ff9900
-    style M fill:#336699
-    style P fill:#00cc66
-    style Q fill:#00cc66
 ```
 
 ---
@@ -104,7 +96,6 @@ graph TD
     SUPER -->|pitch stage| PITCH[Pitcher Agent<br/>Deliver sales pitch]
     SUPER -->|objection stage| OBJ[Objection Handler<br/>Address concerns]
     SUPER -->|closing stage| CLOSE[Closer Agent<br/>Send payment link]
-    SUPER -->|followup stage| FOLLOW[Follow-up Agent<br/>Nurture lead]
     SUPER -->|complete/nurture| END([END])
     
     GREET --> SAVE1[Save State Checkpoint]
@@ -112,24 +103,12 @@ graph TD
     PITCH --> SAVE3[Save State Checkpoint]
     OBJ --> SAVE4[Save State Checkpoint]
     CLOSE --> SAVE5[Save State Checkpoint]
-    FOLLOW --> SAVE6[Save State Checkpoint]
     
     SAVE1 --> SUPER
     SAVE2 --> SUPER
     SAVE3 --> SUPER
     SAVE4 --> SUPER
     SAVE5 --> SUPER
-    SAVE6 --> SUPER
-    
-    style START fill:#90EE90
-    style END fill:#FFB6C1
-    style SUPER fill:#FFD700
-    style GREET fill:#87CEEB
-    style QUAL fill:#87CEEB
-    style PITCH fill:#87CEEB
-    style OBJ fill:#87CEEB
-    style CLOSE fill:#87CEEB
-    style FOLLOW fill:#87CEEB
 ```
 
 ---
@@ -191,13 +170,10 @@ stateDiagram-v2
     ColdPitch --> Closing: Ready to buy
     
     ObjectionHandling --> Closing: Objections resolved
-    ObjectionHandling --> Followup: Still hesitant
+    ObjectionHandling --> Nurture: Too many objections
     
     Closing --> Complete: Payment link sent
-    Closing --> Followup: Not ready now
-    
-    Followup --> Closing: Re-engaged
-    Followup --> Nurture: No response (3+ attempts)
+    Closing --> Nurture: Not ready
     
     Complete --> [*]
     Nurture --> [*]
@@ -317,9 +293,6 @@ graph LR
     PITCH_READ --> PITCH_TOOL
     PITCH_TOOL --> PITCH_WRITE
     PITCH_WRITE --> STATE
-    
-    style STATE fill:#FFE4B5
-    style SUPER_ROUTE fill:#FFD700
 ```
 
 ---
@@ -407,10 +380,6 @@ graph TD
     DECISION -->|>= 0.7| QUALIFIED[QUALIFIED<br/>→ Warm Pitch]
     DECISION -->|0.4 - 0.7| MAYBE[MAYBE QUALIFIED<br/>→ Cold Pitch]
     DECISION -->|< 0.4| NOT[NOT QUALIFIED<br/>→ Nurture]
-    
-    style QUALIFIED fill:#90EE90
-    style MAYBE fill:#FFD700
-    style NOT fill:#FFB6C1
 ```
 
 ---
@@ -516,10 +485,6 @@ graph TD
     ALERT --> RETURN
     
     RETURN --> END([End])
-    
-    style CATCH fill:#FF6B6B
-    style ALERT fill:#FF0000
-    style RETURN fill:#90EE90
 ```
 
 ---
@@ -582,10 +547,6 @@ graph TB
     APP1 --> LANGSMITH
     APP1 --> DATADOG
     APP1 --> SENTRY
-    
-    style PG_PRIMARY fill:#336699
-    style REDIS fill:#DC382D
-    style LB fill:#90EE90
 ```
 
 ---
@@ -646,10 +607,6 @@ graph LR
     E --> I
     F --> J
     G --> K
-    
-    style A fill:#FFE4B5
-    style E fill:#87CEEB
-    style I fill:#90EE90
 ```
 
 ---
@@ -733,10 +690,6 @@ graph TB
     H --> L
     L --> M
     M --> Agent[Agent generates response]
-    
-    style B fill:#4285F4
-    style H fill:#336699
-    style F fill:#FF9900
 ```
 
 ---
@@ -921,12 +874,10 @@ stateDiagram-v2
     Pitch --> Closing: Ready to buy
     
     Objection --> Closing: Objection resolved
-    Objection --> Followup: Multiple objections
-    
-    Followup --> Closing: Re-engaged
-    Followup --> Nurture: Max follow-ups (3)
+    Objection --> Nurture: Too many objections
     
     Closing --> Complete: Payment link sent
+    Closing --> Nurture: Not ready
     
     Complete --> [*]
     Nurture --> [*]
@@ -987,44 +938,21 @@ graph TD
     COLD -->|15 objections| OBJ2[Objection<br/>Handler]
     COLD -->|5 ready| CLOSE2[Closer]
     
-    OBJ1 -->|20 resolved| CLOSE3[Closer]
-    OBJ1 -->|10 hesitant| FOLLOW1[Follow-up]
+    OBJ1 -->|25 resolved| CLOSE3[Closer]
+    OBJ1 -->|5 not ready| NURTURE3[Nurture]
     
-    OBJ2 -->|10 resolved| CLOSE4[Closer]
-    OBJ2 -->|5 hesitant| FOLLOW2[Follow-up]
-    
-    FOLLOW1 -->|6 converted| CLOSE5[Closer]
-    FOLLOW1 -->|4 no response| NURTURE3[Nurture]
-    
-    FOLLOW2 -->|3 converted| CLOSE6[Closer]
-    FOLLOW2 -->|2 no response| NURTURE4[Nurture]
+    OBJ2 -->|12 resolved| CLOSE4[Closer]
+    OBJ2 -->|3 not ready| NURTURE4[Nurture]
     
     CLOSE1 --> COMPLETE1[Complete<br/>15 conversions]
     CLOSE2 --> COMPLETE2[Complete<br/>5 conversions]
-    CLOSE3 --> COMPLETE3[Complete<br/>20 conversions]
-    CLOSE4 --> COMPLETE4[Complete<br/>10 conversions]
-    CLOSE5 --> COMPLETE5[Complete<br/>6 conversions]
-    CLOSE6 --> COMPLETE6[Complete<br/>3 conversions]
+    CLOSE3 --> COMPLETE3[Complete<br/>25 conversions]
+    CLOSE4 --> COMPLETE4[Complete<br/>12 conversions]
     
-    COMPLETE1 --> END([Total: 59 conversions<br/>59% conversion rate])
+    COMPLETE1 --> END([Total: 57 conversions<br/>57% conversion rate])
     COMPLETE2 --> END
     COMPLETE3 --> END
     COMPLETE4 --> END
-    COMPLETE5 --> END
-    COMPLETE6 --> END
-    
-    style START fill:#90EE90
-    style END fill:#FFD700
-    style NURTURE1 fill:#FFB6C1
-    style NURTURE2 fill:#FFB6C1
-    style NURTURE3 fill:#FFB6C1
-    style NURTURE4 fill:#FFB6C1
-    style COMPLETE1 fill:#FFD700
-    style COMPLETE2 fill:#FFD700
-    style COMPLETE3 fill:#FFD700
-    style COMPLETE4 fill:#FFD700
-    style COMPLETE5 fill:#FFD700
-    style COMPLETE6 fill:#FFD700
 ```
 
 ---
@@ -1077,11 +1005,6 @@ graph TB
     D8 --> F1
     E6 --> F2[(analytics_events)]
     E6 --> B1
-    
-    style A1 fill:#4285F4
-    style C1 fill:#90EE90
-    style D2 fill:#FF9900
-    style E2 fill:#00CC66
 ```
 
 ---

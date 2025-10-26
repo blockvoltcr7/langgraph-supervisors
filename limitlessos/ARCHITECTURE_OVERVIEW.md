@@ -16,14 +16,18 @@ The Limitless OS AI Sales Agent is a conversational AI system that qualifies lea
 ### Technology Stack
 
 **Frontend:**
-- Next.js (Vercel) with Vercel AI SDK for streaming
+- **Next.js 16** (Vercel) with Vercel AI SDK for streaming
+- **Node.js 20.9+** (LTS) - Required for Next.js 16
+- React 19.2 with React Server Components
+- TypeScript 5.1+
 - Supabase Auth for owner authentication
 - Drizzle ORM for database queries
+- Tailwind CSS + shadcn/ui for UI components
 
 **Backend:**
-- Python (Google Cloud Run) with LangGraph
+- Python 3.11+ (Google Cloud Run) with LangGraph
 - FastAPI for REST and streaming endpoints
-- OpenAI GPT-4o-mini for LLM
+- OpenAI GPT-5-mini for LLM
 - text-embedding-3-small for embeddings
 
 **Database:**
@@ -66,10 +70,10 @@ The Limitless OS AI Sales Agent is a conversational AI system that qualifies lea
 - Async message processing
 
 ### 5. Campaign Management
-- Owner creates campaign codes with embedded URLs
+- Owner creates campaign codes embedded in URLs
 - Track lead sources and conversion metrics
 - Campaign-level analytics (clicks, conversations, conversions)
-- Usage limits and expiration dates
+- Simple activation/deactivation control
 
 ### 6. Document Management (RAG)
 - Owner uploads sales documents (PDF, DOCX, MD, TXT)
@@ -127,10 +131,10 @@ User Message → Python Backend (FastAPI)
     ↓
 LangGraph Supervisor (routes based on current_stage)
     ↓
-┌────────────┬────────────┬────────────┬────────────┬────────────┬────────────┐
-│  Greeter   │ Qualifier  │  Pitcher   │ Objection  │   Closer   │  Follow-up │
-│   Agent    │   Agent    │   Agent    │  Handler   │   Agent    │   Agent    │
-└────────────┴────────────┴────────────┴────────────┴────────────┴────────────┘
+┌────────────┬────────────┬────────────┬────────────┬────────────┐
+│  Greeter   │ Qualifier  │  Pitcher   │ Objection  │   Closer   │
+│   Agent    │   Agent    │   Agent    │  Handler   │   Agent    │
+└────────────┴────────────┴────────────┴────────────┴────────────┘
     ↓ (Agents use RAG via search_knowledge_base tool)
     ↓
 Query pgvector for Document Embeddings
@@ -155,7 +159,7 @@ Next.js + Vercel AI SDK → Display to User
 ### 1. Campaign & Access Control Layer
 - Campaign code validation
 - Lead source tracking
-- Usage limits and expiration
+- Simple active/inactive status
 - Analytics per campaign
 
 ### 2. Session Management Layer
@@ -166,7 +170,7 @@ Next.js + Vercel AI SDK → Display to User
 
 ### 3. Orchestration Layer (LangGraph)
 - Rule-based supervisor node for routing
-- 6 specialized agents with tools
+- 5 specialized agents with tools
 - Shared state management across all agents
 
 ### 4. RAG Knowledge Layer

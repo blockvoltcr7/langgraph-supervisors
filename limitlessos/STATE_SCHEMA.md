@@ -69,7 +69,6 @@ class SalesConversationState(TypedDict):
         "pitch",         # Delivering sales pitch
         "objection",     # Handling objections
         "closing",       # Sending payment link
-        "followup",      # Follow-up sequence
         "complete",      # Deal won (payment received)
         "nurture"        # Not qualified, save for future
     ]
@@ -219,7 +218,6 @@ class SalesConversationState(TypedDict):
         "pitcher",
         "objection_handler",
         "closer",
-        "followup",
         "FINISH"
     ]
     """
@@ -238,7 +236,7 @@ class SalesConversationState(TypedDict):
     """ISO 8601 timestamp of last state update"""
     
     last_message_at: str
-    """ISO 8601 timestamp of last user message (for follow-up timing)"""
+    """ISO 8601 timestamp of last user message"""
     
     session_count: int
     """Number of times user has resumed conversation (1 = first session)"""
@@ -505,64 +503,11 @@ ON checkpoints((checkpoint->>'current_stage'));
 CREATE INDEX idx_qualified 
 ON checkpoints((checkpoint->>'qualified'))
 WHERE checkpoint->>'qualified' = 'true';
-
--- Index for finding leads needing follow-up
-CREATE INDEX idx_last_message_at 
-ON checkpoints((checkpoint->>'last_message_at'));
 ```
 
 ---
 
 ## State Query Patterns
-
-### Find All Active Conversations
-
-```python
-def get_active_conversations(since_hours: int = 24) -> list[dict]:
-    """Get all conversations with activity in last N hours"""
-    cutoff = datetime.utcnow() - timedelta(hours=since_hours)
-    
-    query = """
-    SELECT DISTINCT ON (thread_id)
-        thread_id,
-        checkpoint->>'instagram_handle' as instagram_handle,
-        checkpoint->>'current_stage' as stage,
-        checkpoint->>'last_message_at' as last_message_at
-    FROM checkpoints
-    WHERE (checkpoint->>'last_message_at')::timestamp > %s
-    ORDER BY thread_id, created_at DESC
-    """
-    
-    # Execute query...
-    return results
-```
-
-### Find Leads Needing Follow-up
-
-```python
-def get_leads_for_followup() -> list[dict]:
-    """Find leads who should receive follow-up messages"""
-    
-    # Day 1 follow-up: Leads who saw pitch but didn't respond
-    # Day 3 follow-up: Leads still in objection stage
-    # Day 5 follow-up: Final urgency message
-    
-    query = """
-    SELECT DISTINCT ON (thread_id)
-        thread_id,
-        checkpoint->>'instagram_handle' as instagram_handle,
-        checkpoint->>'current_stage' as stage,
-        checkpoint->>'last_message_at' as last_message_at
-    FROM checkpoints
-    WHERE 
-        checkpoint->>'current_stage' IN ('pitch', 'objection', 'followup')
-        AND checkpoint->>'payment_link_sent' = 'false'
-        AND (checkpoint->>'last_message_at')::timestamp < NOW() - INTERVAL '24 hours'
-    ORDER BY thread_id, created_at DESC
-    """
-    
-    return results
-```
 
 ### Analytics: Conversion Funnel
 
@@ -582,54 +527,12 @@ def get_conversion_metrics() -> dict:
     SELECT
         COUNT(*) as total_leads,
         COUNT(*) FILTER (WHERE qualified = 'true') as qualified_leads,
-        COUNT(*) FILTER (WHERE stage IN ('pitch', 'objection', 'closing', 'followup', 'complete')) as pitched_leads,
+        COUNT(*) FILTER (WHERE stage IN ('pitch', 'objection', 'closing', 'complete')) as pitched_leads,
         COUNT(*) FILTER (WHERE payment_completed = 'true') as converted_leads
     FROM latest_states
     """
     
     # Returns: {total_leads: 100, qualified_leads: 75, pitched_leads: 60, converted_leads: 15}
-```
-
----
-
-## State Size Optimization
-
-### Problem: State Can Grow Large
-
-With long conversations (50+ messages), state JSON can exceed 100KB.
-
-### Solution 1: Message Pruning
-
-```python
-def prune_old_messages(state: SalesConversationState, keep_last_n: int = 20):
-    """Keep only recent messages to reduce state size"""
-    messages = state.get("messages", [])
-    
-    if len(messages) > keep_last_n:
-        # Always keep system messages and key tool messages
-        important_messages = [m for m in messages if is_important(m)]
-        recent_messages = messages[-keep_last_n:]
-        
-        state["messages"] = important_messages + recent_messages
-    
-    return state
-```
-
-### Solution 2: Separate Message Storage
-
-```python
-# Store full conversation in separate table
-CREATE TABLE conversation_messages (
-    thread_id TEXT NOT NULL,
-    message_id TEXT NOT NULL,
-    role TEXT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    PRIMARY KEY (thread_id, message_id)
-);
-
-# Keep only last 10 messages in state
-# Retrieve full history when needed for analysis
 ```
 
 ---

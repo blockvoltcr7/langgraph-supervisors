@@ -13,9 +13,8 @@
 5. [Pitch Scripts](#pitch-scripts)
 6. [Objection Handling](#objection-handling)
 7. [Urgency & Scarcity Messaging](#urgency--scarcity-messaging)
-8. [Follow-up Sequences](#follow-up-sequences)
-9. [Closing Process](#closing-process)
-10. [Conversation Flow Map](#conversation-flow-map)
+8. [Closing Process](#closing-process)
+9. [Conversation Flow Map](#conversation-flow-map)
 
 ---
 
@@ -175,7 +174,7 @@ Confirm fit and readiness to invest before delivering pitch.
 
 ### **Questions (Ask in Order)**
 
-**Q1: "Hey [Name], what type of coaching do you offer right now?"**
+**Q1: "Hey, what type of coaching do you offer right now?"**
 - **Purpose**: Verify niche fit
 - **Red Flags**: Not in health/fitness/wellness/mindset
 - **Green Flags**: Health, fitness, wellness, mindset, nutrition
@@ -323,7 +322,7 @@ Confirm fit and readiness to invest before delivering pitch.
 > "Of course — this is a big decision. What specifically do you need to think about? Is it the price, timing, or something else? Let me address that for you now."
 
 **If Still Hesitant**:
-> "No problem. Just so you know, we're filling spots for this month's onboarding. If you want your funnel live by [date], we'd need to get started this week. I'll follow up with you in a couple of days."
+> "No problem. Just so you know, we're filling spots for this month's onboarding. If you want your funnel live by [date], we'd need to get started this week. Does that timeline work for you?"
 
 ---
 
@@ -339,9 +338,9 @@ Confirm fit and readiness to invest before delivering pitch.
 
 ---
 
-### **Strong Urgency (Hesitant Lead or Follow-up)**
+### **Strong Urgency (During Closing)**
 
-**Use When**: Lead is on the fence or hasn't responded
+**Use When**: Lead is on the fence or hesitant to commit
 
 **Examples**:
 - "We only take 10 new clients per month so we can deliver fast — we've got 3 spots left right now."
@@ -354,38 +353,6 @@ Confirm fit and readiness to invest before delivering pitch.
 ⚠️ **Don't Overuse**: Use urgency strategically, not in every message
 ✅ **Be Honest**: Only use if genuinely limited (track in CRM)
 ✅ **Tie to Benefit**: "If you start now, you'll be live by [date]" (not just "hurry up")
-
----
-
-## Follow-up Sequences
-
-### **Day 1 Follow-up** (24 hours after pitch)
-
-**Message**:
-> "Hey [Name], just checking in — want to make sure you saw my last message about Limitless OS. This could have you fully automated in 14 days. Any questions I can answer?"
-
----
-
-### **Day 3 Follow-up** (72 hours after pitch)
-
-**Message**:
-> "We're filling spots for this month's onboarding. If you want to launch your funnel by [date], we should get you locked in now. Which plan works best for you — $297 + $997 build, or $497/month?"
-
----
-
-### **Day 5 Follow-up** (Final attempt)
-
-**Message**:
-> "Last call for this month's onboarding spots — we're almost full. If you want to lock in your spot, I can send your link now."
-
----
-
-### **Follow-up Rules**
-
-- ✅ Maximum 3 follow-ups (don't spam)
-- ✅ Add value each time (not just "checking in")
-- ✅ Use urgency on final follow-up
-- ✅ After 3 attempts → Move to nurture sequence
 
 ---
 
@@ -471,17 +438,15 @@ Confirm fit and readiness to invest before delivering pitch.
           │               │
           ▼               ▼
 ┌──────────────────┐  ┌──────────────────┐
-│ STAGE 4: CLOSING │  │ FOLLOW-UP        │
-│ Send payment link│  │ Day 1, 3, 5      │
+│ STAGE 4: CLOSING │  │ NURTURE          │
+│ Send payment link│  │ Not ready now    │
 └────────┬─────────┘  └──────────────────┘
          │
          ▼
-┌─────────────────────────────────────────┐
-│    PAYMENT COMPLETE                     │
-│  → Send onboarding email                │
-│  → Update CRM                           │
-│  → Tag as "Customer"                    │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      PAYMENT RECEIVED                           │
+│                   → Customer Onboarding                         │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---

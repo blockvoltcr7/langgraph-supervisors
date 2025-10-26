@@ -67,16 +67,16 @@
 - **Time:** 10 min
 
 ### 7. [AGENT_DESIGNS.yaml](./AGENT_DESIGNS.yaml)
-- **Purpose:** Specifications for all 6 agents
-- **Read:** All agent definitions (Greeter, Qualifier, Pitcher, Objection Handler, Closer, Follow-up)
+- **Purpose:** Specifications for all 5 agents
+- **Read:** All agent definitions (Greeter, Qualifier, Pitcher, Objection Handler, Closer)
 - **Key Takeaway:** How each agent works and what tools it uses
-- **Time:** 15 min
+- **Time:** 12 min
 
 ### 8. [TOOLS_API.yaml](./TOOLS_API.yaml)
 - **Purpose:** Tool definitions that agents use
-- **Read:** All tool specifications (state management, qualification, RAG, closing, follow-up)
+- **Read:** All tool specifications (state management, qualification, RAG, closing)
 - **Key Takeaway:** What capabilities each agent has
-- **Time:** 15 min
+- **Time:** 12 min
 
 ---
 
@@ -110,6 +110,24 @@
 
 ---
 
+## Phase 5: Frontend (Next.js 16) (45 min)
+
+**Frontend implementation with Next.js 16**
+
+### 13. [nextjs16/NEXTJS_16_SETUP.md](./nextjs16/NEXTJS_16_SETUP.md)
+- **Purpose:** Complete Next.js 16 setup, configuration, and key features
+- **Read:** Prerequisites, Installation, Project Structure, Next.js 16 Configuration, Key Features
+- **Key Takeaway:** How to set up and configure Next.js 16 with all required dependencies
+- **Time:** 25 min
+
+### 14. [nextjs16/INTEGRATION_GUIDE.md](./nextjs16/INTEGRATION_GUIDE.md)
+- **Purpose:** Backend integration patterns and API client setup
+- **Read:** API Client Setup, API Routes, Frontend Components, Error Handling
+- **Key Takeaway:** How the Next.js frontend connects to the Python LangGraph backend
+- **Time:** 20 min
+
+---
+
 ## ⚡ Quick Paths by Role
 
 ### 👔 Product Manager / Business Owner
@@ -124,17 +142,19 @@
 ---
 
 ### 🏗️ Full-Stack Developer (Frontend + Backend)
-**Total Time: 90 min**
+**Total Time: 135 min**
 1. README.md (all)
 2. ARCHITECTURE_OVERVIEW.md
 3. STATE_SCHEMA.md
 4. DATABASE_SCHEMA.md
 5. API_ENDPOINTS.md
-6. AGENT_DESIGNS.yaml
-7. CAMPAIGN_SYSTEM.md
-8. RAG_SYSTEM.md
+6. nextjs16/NEXTJS_16_SETUP.md
+7. nextjs16/INTEGRATION_GUIDE.md
+8. AGENT_DESIGNS.yaml
+9. CAMPAIGN_SYSTEM.md
+10. RAG_SYSTEM.md
 
-**Why:** You need to understand the complete flow from database to UI, including state management and API contracts.
+**Why:** You need to understand the complete flow from database to UI, including state management, API contracts, and Next.js 16 frontend implementation.
 
 ---
 
@@ -177,6 +197,19 @@
 
 ---
 
+### 💻 Frontend Developer (Next.js)
+**Total Time: 70 min**
+1. README.md (Technology Stack section)
+2. ARCHITECTURE_OVERVIEW.md (Frontend section)
+3. nextjs16/NEXTJS_16_SETUP.md (all)
+4. nextjs16/INTEGRATION_GUIDE.md (all)
+5. API_ENDPOINTS.md (Next.js API Routes section)
+6. STATE_SCHEMA.md (Overview - to understand what data flows to frontend)
+
+**Why:** Deep dive into Next.js 16 setup, async APIs, streaming responses, and backend integration patterns.
+
+---
+
 ## 📊 Documentation Map
 
 ```
@@ -195,6 +228,9 @@ ARCHITECTURE_DIAGRAMS.md (Visual reference)
     │   └─→ TOOLS_API.yaml (What they can do)
     │
     ├─→ API_ENDPOINTS.md (How we communicate)
+    │
+    ├─→ nextjs16/NEXTJS_16_SETUP.md (Frontend setup)
+    │   └─→ nextjs16/INTEGRATION_GUIDE.md (Backend integration)
     │
     ├─→ CAMPAIGN_SYSTEM.md (How we track leads)
     │
@@ -235,14 +271,16 @@ ARCHITECTURE_DIAGRAMS.md (Visual reference)
 | SALES_PLAYBOOK.md | 3 | 10 min | Detailed |
 | EXAMPLE_CONVERSATIONS.md | 5 | 10 min | Practical |
 | STATE_SCHEMA.md | 3 | 10 min | Detailed |
-| AGENT_DESIGNS.yaml | 6 | 15 min | Reference |
-| TOOLS_API.yaml | 4 | 10 min | Reference |
+| AGENT_DESIGNS.yaml | 6 | 12 min | Reference |
+| TOOLS_API.yaml | 4 | 12 min | Reference |
 | DATABASE_SCHEMA.md | 8 | 15 min | Detailed |
 | API_ENDPOINTS.md | 5 | 10 min | Reference |
 | CAMPAIGN_SYSTEM.md | 5 | 10 min | Detailed |
 | RAG_SYSTEM.md | 6 | 10 min | Detailed |
+| nextjs16/NEXTJS_16_SETUP.md | 12 | 25 min | Detailed |
+| nextjs16/INTEGRATION_GUIDE.md | 10 | 20 min | Detailed |
 
-**Total: ~60 pages, ~120 minutes for complete review**
+**Total: ~82 pages, ~165 minutes for complete review**
 
 ---
 
@@ -250,16 +288,19 @@ ARCHITECTURE_DIAGRAMS.md (Visual reference)
 
 After reading all documentation, you should be able to answer:
 
-- [ ] What are the 6 agents and what does each do?
+- [ ] What are the 5 agents and what does each do?
 - [ ] How does a lead move through the conversation stages?
 - [ ] What data is stored in the state and why?
 - [ ] How do campaigns track lead sources?
 - [ ] How does RAG integrate with agents?
 - [ ] What are the database tables and their relationships?
 - [ ] How do the frontend and backend communicate?
+- [ ] What are Next.js 16's async API requirements?
+- [ ] How does streaming chat work with Vercel AI SDK?
 - [ ] What are the qualification criteria?
 - [ ] How does payment integration work?
 - [ ] What are the deployment requirements?
+- [ ] What Node.js version is required for Next.js 16?
 
 ---
 

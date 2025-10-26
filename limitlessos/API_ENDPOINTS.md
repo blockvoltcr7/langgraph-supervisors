@@ -1,6 +1,10 @@
 # Limitless OS - API Endpoints Specification
 
-**Complete REST and Streaming API documentation**
+**Complete DRAFT ONLY SUBJECT TO CHANGE REST and Streaming API documentation**
+
+this is subject to change. this is a draft only and assumptions
+we will use references from other projects to finalize our apis
+
 
 ---
 
@@ -50,8 +54,7 @@ Create a new campaign
 {
   "name": "Instagram Ads - Jan 2025",
   "description": "Winter campaign targeting fitness coaches",
-  "max_uses": 100,
-  "expires_at": "2025-02-28T23:59:59Z"
+  "platform": "instagram"
 }
 ```
 
@@ -81,7 +84,7 @@ Create a new campaign
 List all campaigns
 
 **Query Params**:
-- `status` (optional): "active" | "expired" | "all"
+- `status` (optional): "active" | "inactive" | "all"
 - `limit` (optional): number (default: 50)
 - `offset` (optional): number (default: 0)
 
@@ -392,7 +395,6 @@ Validate campaign code before starting chat
   "campaign": {
     "code": "ABC123",
     "name": "Instagram Ads - Jan 2025",
-    "expires_at": "2025-02-28T23:59:59Z",
     "is_active": true
   }
 }
@@ -400,7 +402,7 @@ Validate campaign code before starting chat
 
 **Errors**:
 - `404` - Campaign not found
-- `410` - Campaign expired
+- `403` - Campaign inactive
 
 ---
 
@@ -491,8 +493,7 @@ Receive Stripe payment events
 |------|-------------|-------------|
 | `UNAUTHORIZED` | 401 | Invalid or missing auth token |
 | `CAMPAIGN_NOT_FOUND` | 404 | Campaign code doesn't exist |
-| `CAMPAIGN_EXPIRED` | 410 | Campaign has expired |
-| `CAMPAIGN_LIMIT_REACHED` | 429 | Campaign max uses reached |
+| `CAMPAIGN_INACTIVE` | 403 | Campaign is not active |
 | `INVALID_INPUT` | 400 | Validation error |
 | `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
 | `INTERNAL_ERROR` | 500 | Server error |

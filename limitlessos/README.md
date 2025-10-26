@@ -13,22 +13,27 @@
 3. **[STATE_SCHEMA.md](./STATE_SCHEMA.md)** - LangGraph state design with campaign tracking
 4. **[TRADE_OFFS_ANALYSIS.md](./TRADE_OFFS_ANALYSIS.md)** - Architecture decisions and cost analysis
 
+### Frontend (Next.js 16)
+
+5. **[nextjs16/NEXTJS_16_SETUP.md](./nextjs16/NEXTJS_16_SETUP.md)** - Complete Next.js 16 setup and configuration
+6. **[nextjs16/INTEGRATION_GUIDE.md](./nextjs16/INTEGRATION_GUIDE.md)** - Backend integration and API client setup
+
 ### Implementation Specifications
 
-5. **[AGENT_DESIGNS.yaml](./AGENT_DESIGNS.yaml)** - Complete agent specifications and routing logic
-6. **[TOOLS_API.yaml](./TOOLS_API.yaml)** - Tool definitions for all agents
-7. **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)** - Supabase tables and Drizzle ORM schemas
-8. **[API_ENDPOINTS.md](./API_ENDPOINTS.md)** - REST and streaming API specifications
+7. **[AGENT_DESIGNS.yaml](./AGENT_DESIGNS.yaml)** - Complete agent specifications and routing logic
+8. **[TOOLS_API.yaml](./TOOLS_API.yaml)** - Tool definitions for all agents
+9. **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)** - Supabase tables and Drizzle ORM schemas
+10. **[API_ENDPOINTS.md](./API_ENDPOINTS.md)** - REST and streaming API specifications
 
 ### System Features
 
-9. **[CAMPAIGN_SYSTEM.md](./CAMPAIGN_SYSTEM.md)** - Campaign codes, access control, and analytics
-10. **[RAG_SYSTEM.md](./RAG_SYSTEM.md)** - Document upload and embedding architecture
-11. **[EXAMPLE_CONVERSATIONS.md](./EXAMPLE_CONVERSATIONS.md)** - Sample conversation flows
+11. **[CAMPAIGN_SYSTEM.md](./CAMPAIGN_SYSTEM.md)** - Campaign codes, access control, and analytics
+12. **[RAG_SYSTEM.md](./RAG_SYSTEM.md)** - Document upload and embedding architecture
+13. **[EXAMPLE_CONVERSATIONS.md](./EXAMPLE_CONVERSATIONS.md)** - Sample conversation flows
 
 ### Business Logic
 
-12. **[SALES_PLAYBOOK.md](./SALES_PLAYBOOK.md)** - Sales scripts, objection handling, and messaging
+14. **[SALES_PLAYBOOK.md](./SALES_PLAYBOOK.md)** - Sales scripts, objection handling, and messaging
 
 ---
 
@@ -38,11 +43,13 @@
 An AI sales agent that qualifies leads, handles objections, delivers pitches, and closes deals through multi-turn conversations **with full persistence across sessions** (resume after days/weeks).
 
 ### Technology Stack
-- **Frontend:** Next.js (Vercel) with Vercel AI SDK
-- **Backend:** Python (Google Cloud) with LangGraph
+- **Frontend:** Next.js 16 (Vercel) with Vercel AI SDK
+- **Runtime:** Node.js 20.9+ (LTS) - Required
+- **UI Framework:** React 19.2 + TypeScript 5.1+
+- **Backend:** Python 3.11+ (Google Cloud) with LangGraph
 - **Database:** Supabase PostgreSQL with pgvector
 - **ORM:** Drizzle
-- **LLM:** OpenAI GPT-4o-mini
+- **LLM:** OpenAI GPT-5-mini
 - **Storage:** Google Cloud Storage
 - **Payments:** Stripe
 - **Auth:** Supabase Auth
@@ -67,13 +74,12 @@ Load/Create State → LangGraph Agent (with RAG) → Save Checkpoint → Stream 
 Greeting → Qualification → Pitch → Objection Handling → Closing → Complete
 ```
 
-### 6 Specialized Agents
+### 5 Specialized Agents
 1. **Greeter** - Welcome & verify niche
 2. **Qualifier** - Ask questions, calculate score
 3. **Pitcher** - Deliver warm/cold pitch
 4. **Objection Handler** - Address concerns
 5. **Closer** - Send payment link via Stripe
-6. **Follow-up** - Nurture leads
 
 ---
 
@@ -130,13 +136,18 @@ Greeting → Qualification → Pitch → Objection Handling → Closing → Comp
 
 ## 🚀 Quick Start
 
-See complete setup instructions in individual documentation files.
+### Next.js 16 Frontend Setup
+
+**📖 Complete Next.js 16 documentation available in [nextjs16/](./nextjs16/) folder:**
+- **[NEXTJS_16_SETUP.md](./nextjs16/NEXTJS_16_SETUP.md)** - Complete Next.js 16 setup guide
+- **[INTEGRATION_GUIDE.md](./nextjs16/INTEGRATION_GUIDE.md)** - Backend integration guide
 
 ### Development Environment Setup
 
 **Prerequisites:**
-- Node.js 18+ (for Next.js)
-- Python 3.11+ (for LangGraph backend)
+- **Node.js 20.9+ (LTS)** - Required for Next.js 16
+- **Python 3.11+** - For LangGraph backend
+- **TypeScript 5.1+** - Required for Next.js 16
 - Supabase account
 - Google Cloud account
 - OpenAI API key

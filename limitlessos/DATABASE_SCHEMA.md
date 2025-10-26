@@ -102,10 +102,6 @@ export const owners = pgTable('owners', {
   // Supabase Auth integration
   supabase_user_id: text('supabase_user_id').notNull().unique(),
   
-  // Settings
-  default_campaign_duration_days: integer('default_campaign_duration_days').default(30),
-  max_active_campaigns: integer('max_active_campaigns').default(10),
-  
   // Metadata
   created_at: timestamp('created_at').defaultNow().notNull(),
   last_login_at: timestamp('last_login_at'),
@@ -141,12 +137,13 @@ export const campaigns = pgTable('campaigns', {
   // Owner relationship
   owner_id: text('owner_id').references(() => owners.id).notNull(),
   
-  // Campaign settings
-  max_uses: integer('max_uses'), // null = unlimited
-  expires_at: timestamp('expires_at'),
+  // Optional: Platform/source tracking
+  platform: text('platform'), // "instagram", "facebook", "youtube", etc.
+  
+  // Simple on/off switch
   is_active: boolean('is_active').default(true).notNull(),
   
-  // Usage tracking
+  // Analytics tracking
   total_clicks: integer('total_clicks').default(0).notNull(),
   total_conversations: integer('total_conversations').default(0).notNull(),
   total_qualified: integer('total_qualified').default(0).notNull(),
@@ -163,7 +160,6 @@ export const campaigns = pgTable('campaigns', {
 CREATE UNIQUE INDEX idx_campaigns_code ON campaigns(code);
 CREATE INDEX idx_campaigns_owner_id ON campaigns(owner_id);
 CREATE INDEX idx_campaigns_is_active ON campaigns(is_active) WHERE is_active = true;
-CREATE INDEX idx_campaigns_expires_at ON campaigns(expires_at);
 ```
 
 ---
@@ -727,11 +723,6 @@ WITH old_conversations AS (
 )
 DELETE FROM checkpoints
 WHERE thread_id IN (SELECT id FROM old_conversations);
-
--- Clean up expired campaigns
-UPDATE campaigns
-SET is_active = false
-WHERE expires_at < NOW() AND is_active = true;
 ```
 
 ---
