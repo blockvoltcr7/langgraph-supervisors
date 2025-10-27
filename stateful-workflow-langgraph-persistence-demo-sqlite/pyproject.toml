@@ -1,0 +1,15 @@
+[project]
+name = "stateful-workflow-langgraph-persistence-demo"
+version = "0.1.0"
+description = "Stateful workflows with persistence using LangGraph v1 checkpointers"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=1.0.1",                       # LangGraph v1
+    "langgraph-checkpoint-sqlite>=2.0.0",     # SQLite persistence
+    "langchain>=1.0.0",                       # LangChain v1
+    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1",                # OpenAI integration
+    "python-dotenv>=1.0.0",
+    "langgraph-cli[inmem]>=0.4.4",            # LangGraph Studio support
+]
