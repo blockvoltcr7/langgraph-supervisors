@@ -1,5 +1,5 @@
 """
-Stateful Workflows with Persistence Pattern
+Stateful Workflows with Persistence Pattern (LangGraph v1)
 
 This demonstrates how to build long-running workflows that:
 1. Save state at every step (checkpointing)
@@ -14,6 +14,11 @@ Use Case: Multi-Day Project Management Workflow
 - Day 3: Review and finalize
 - Can pause/resume at any point
 - Can go back and change decisions
+
+Updated for LangGraph v1 / LangChain v1:
+- Using latest LangGraph v1 APIs
+- Compatible with LangChain v1 ecosystem
+- Enhanced persistence with SqliteSaver v2.0.0
 """
 
 import os
@@ -308,6 +313,11 @@ def create_project_workflow(db_path: str = "project_checkpoints.db"):
     Returns:
         Compiled graph with checkpointer
     """
+    # Handle case where function is called with config (LangGraph Studio)
+    if isinstance(db_path, dict):
+        # LangGraph Studio passes config dict, use default db path
+        db_path = "project_checkpoints.db"
+    
     # Create checkpointer (persists to SQLite)
     # Create connection and initialize checkpointer
     conn = sqlite3.connect(db_path, check_same_thread=False)
