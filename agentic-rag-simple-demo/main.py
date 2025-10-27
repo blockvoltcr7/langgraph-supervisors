@@ -20,11 +20,10 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_core.tools import tool
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import WebBaseLoader
+from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.agents import create_agent
 from langgraph.graph import StateGraph, START, END, MessagesState
-from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
 # ============================================================================
@@ -55,8 +54,30 @@ if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
         f"   File location: {env_path}"
     )
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL or DATABASE_URL == "your_database_url_here":
+    raise ValueError(
+        "DATABASE_URL not configured properly.\n"
+        "Please:\n"
+        "1. Edit .env and add your PostgreSQL/Supabase connection string\n"
+        "2. Format: postgresql://user:password@host:port/database\n"
+        f"   File location: {env_path}"
+    )
+
+# Debug: Print connection info (hide password)
+if DATABASE_URL:
+    # Extract host for debugging (hide password)
+    import re
+    host_match = re.search(r'@([^:]+):', DATABASE_URL)
+    if host_match:
+        print(f"🔌 Connecting to host: {host_match.group(1)}")
+    print(f"📍 Using DATABASE_URL from: {env_path}")
+
 model = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
-embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-small",  # Latest OpenAI embedding model
+    api_key=OPENAI_API_KEY
+)
 
 # Optional LangSmith tracing
 LANGSMITH_TRACING = os.getenv("LANGSMITH_TRACING", "false").lower() == "true"
@@ -76,13 +97,13 @@ else:
 
 def create_vectorstore():
     """
-    Create a vector store from sample documents.
-    In production, you'd load from your actual documentation.
+    Create a PGVector store from sample documents.
+    Stores vectors in PostgreSQL with pgvector extension.
+    Perfect for production with Supabase or any PostgreSQL database.
     """
-    print("\n📚 Creating knowledge base...")
+    print("\n📚 Creating PGVector knowledge base...")
     
     # Sample documents about LangGraph concepts
-    # In production, use WebBaseLoader or load from files
     documents = [
         Document(
             page_content="""
@@ -188,7 +209,7 @@ def create_vectorstore():
             - Agents are specialized (research, coding, etc.)
             - Communication flows through supervisor
             
-            Use create_react_agent() to build individual agents with tools.
+            Use create_agent() to build individual agents with tools.
             """,
             metadata={"source": "langgraph_multi_agent", "topic": "patterns"}
         ),
@@ -204,9 +225,17 @@ def create_vectorstore():
     splits = text_splitter.split_documents(documents)
     print(f"   Split into {len(splits)} chunks")
     
-    # Create vector store
-    vectorstore = FAISS.from_documents(splits, embeddings)
-    print(f"   ✅ Vector store created with {len(splits)} chunks")
+    # Create PGVector store
+    # This will create the collection if it doesn't exist
+    vectorstore = PGVector.from_documents(
+        documents=splits,
+        embedding=embeddings,
+        collection_name="langgraph_docs",
+        connection=DATABASE_URL,  # Updated parameter name for langchain-postgres
+        pre_delete_collection=True,  # Clear existing data on restart (for demo)
+    )
+    print(f"   ✅ PGVector store created with {len(splits)} chunks")
+    print(f"   📊 Collection: langgraph_docs")
     
     return vectorstore
 
@@ -238,6 +267,7 @@ def retrieve_langgraph_docs(query: str) -> str:
     results = []
     for i, doc in enumerate(docs, 1):
         results.append(f"[Document {i}]\n{doc.page_content}\n")
+        print(f"   Document {i}: {doc.page_content}")   
     
     combined = "\n".join(results)
     print(f"   ✅ Retrieved {len(docs)} relevant documents")
@@ -262,10 +292,10 @@ def create_agentic_rag():
     """
     
     # Create the agent with retrieval tool
-    agent = create_react_agent(
-        model,
+    agent = create_agent(
+        model=model,
         tools=[retrieve_langgraph_docs],
-        prompt="""You are a helpful assistant that answers questions about LangGraph.
+        system_prompt="""You are a helpful assistant that answers questions about LangGraph.
 
 IMPORTANT INSTRUCTIONS:
 1. For general questions or greetings, respond directly WITHOUT using tools
