@@ -1,5 +1,5 @@
 """
-Manual Supervisor Example (What you've been building)
+Manual Supervisor Example (LangGraph v1)
 
 This demonstrates the MANUAL way to create a supervisor multi-agent system.
 400+ lines of code for full control.
@@ -8,6 +8,10 @@ Use Case: Travel Booking Assistant (Same as prebuilt)
 - Flight booking agent
 - Hotel booking agent  
 - Supervisor coordinates them
+
+Updated for LangGraph v1 / LangChain v1:
+- Using create_agent instead of create_react_agent
+- Using system_prompt parameter instead of prompt
 """
 
 import os
@@ -21,7 +25,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent  # LangChain v1
 
 # Load environment
 env_path = Path(__file__).parent / ".env"
@@ -67,19 +71,19 @@ class SupervisorState(TypedDict):
     next_agent: Literal["flight", "hotel", "FINISH", "__start__"]
 
 # ============================================================================
-# Create Agents (Same as prebuilt)
+# Create Agents using create_agent (LangChain v1)
 # ============================================================================
 
-flight_agent = create_react_agent(
-    model,
+flight_agent = create_agent(
+    model=model,
     tools=[book_flight, search_flights],
-    prompt="You are a flight booking specialist. Help users search and book flights."
+    system_prompt="You are a flight booking specialist. Help users search and book flights."
 )
 
-hotel_agent = create_react_agent(
-    model,
+hotel_agent = create_agent(
+    model=model,
     tools=[book_hotel, search_hotels],
-    prompt="You are a hotel booking specialist. Help users search and book hotels."
+    system_prompt="You are a hotel booking specialist. Help users search and book hotels."
 )
 
 # ============================================================================
@@ -189,6 +193,9 @@ def create_manual_supervisor():
 
 # Create the supervisor
 supervisor = create_manual_supervisor()
+
+# Export for LangGraph server
+graph = supervisor
 
 # ============================================================================
 # Example Usage (Same as prebuilt)

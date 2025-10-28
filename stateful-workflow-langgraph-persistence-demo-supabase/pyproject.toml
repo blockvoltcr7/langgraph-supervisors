@@ -1,0 +1,16 @@
+[project]
+name = "stateful-workflow-langgraph-persistence-demo-supabase"
+version = "0.2.0"
+description = "Stateful workflows with Supabase persistence using LangGraph v1 PostgresSaver"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=1.0.1",                       # LangGraph v1
+    "langgraph-checkpoint-postgres>=2.0.3,<3.0.0",   # PostgreSQL/Supabase persistence (v2.x works, v3.0.0 has issues)
+    "langchain>=1.0.0",                       # LangChain v1
+    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1",                # OpenAI integration
+    "python-dotenv>=1.0.0",
+    "langgraph-cli[inmem]>=0.4.4",            # LangGraph Studio support
+    "psycopg>=3.1.0",                         # PostgreSQL adapter (required by langgraph-checkpoint-postgres)
+]

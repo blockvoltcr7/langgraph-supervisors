@@ -5,12 +5,13 @@ description = "Agentic RAG - Agent decides when to retrieve from knowledge base"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "langgraph>=1.0.1",                       # LangGraph v1
-    "langchain>=1.0.0",                       # LangChain v1 with create_agent
-    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
-    "langchain-openai>=1.0.1",                # OpenAI integration
-    "langchain-postgres>=0.0.12",             # PGVector integration
-    "langchain-text-splitters>=1.0.0",        # Text splitting utilities
-    "psycopg2-binary>=2.9.9",                 # PostgreSQL adapter
+    "langgraph>=1.0.1", # LangGraph v1
+    "langchain>=1.0.0", # LangChain v1 with create_agent
+    "langchain-core>=1.0.0,<2.0.0", # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1", # OpenAI integration
+    "langchain-postgres>=0.0.12", # PGVector integration
+    "langchain-text-splitters>=1.0.0", # Text splitting utilities
+    "psycopg2-binary>=2.9.9", # PostgreSQL adapter
     "python-dotenv>=1.0.0",
+    "langgraph-cli[inmem]>=0.4.4",
 ]

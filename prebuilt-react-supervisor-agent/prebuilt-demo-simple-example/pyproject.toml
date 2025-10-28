@@ -1,14 +1,15 @@
 [project]
 name = "prebuilt-demo-simple-example"
 version = "0.1.0"
-description = "Prebuilt supervisor demo using create_supervisor and create_react_agent"
+description = "Prebuilt supervisor demo using create_supervisor and create_agent (LangGraph v1)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "langgraph>=0.2.58",
-    "langgraph-supervisor>=0.0.6",
-    "langchain>=0.3.0",
-    "langchain-openai>=0.3.0",
-    "langchain-core>=0.3.64",
+    "langgraph>=1.0.1",                       # LangGraph v1
+    "langgraph-supervisor>=0.0.6",            # Supervisor helper
+    "langchain>=1.0.0",                       # LangChain v1 with create_agent
+    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1",                # OpenAI integration
     "python-dotenv>=1.0.0",
+    "langgraph-cli[inmem]>=0.4.4",            # LangGraph Studio support
 ]

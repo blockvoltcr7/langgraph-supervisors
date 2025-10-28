@@ -1,0 +1,17 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "sales": "./main.py:create_sales_graph"
+  },
+  "assistants": {
+    "sales_agent": {
+      "graph": "sales",
+      "config": {},
+      "metadata": {
+        "name": "Sales Qualification Agent",
+        "description": "AI agent that qualifies users for a $300 program"
+      }
+    }
+  },
+  "env": ".env"
+}

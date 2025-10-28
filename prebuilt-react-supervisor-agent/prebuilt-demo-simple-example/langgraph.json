@@ -1,0 +1,8 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "prebuilt_supervisor": "./prebuilt_supervisor.py:supervisor",
+    "manual_supervisor": "./manual_supervisor.py:graph"
+  },
+  "env": ".env"
+}

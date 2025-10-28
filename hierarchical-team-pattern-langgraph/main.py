@@ -1,5 +1,5 @@
 """
-Hierarchical Multi-Agent Team Pattern with LangGraph
+Hierarchical Multi-Agent Team Pattern with LangGraph v1
 
 This demonstrates a supervisor-of-supervisors architecture where:
 - Top Supervisor coordinates team supervisors
@@ -14,6 +14,10 @@ Architecture:
         /        \            /          \
     Email      Slack      Calendar    Meeting
     Agent      Agent      Agent       Agent
+
+Updated for LangGraph v1 / LangChain v1:
+- Using create_agent instead of create_react_agent
+- Using system_prompt parameter instead of prompt
 """
 
 import os
@@ -24,7 +28,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import MessagesState
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent  # LangChain v1
 
 # Load environment variables from .env file
 from pathlib import Path
@@ -106,20 +110,20 @@ class HierarchicalState(MessagesState):
 # ============================================================================
 
 # Communication Team Agents
-email_agent = create_react_agent(
-    model,
+email_agent = create_agent(
+    model=model,
     tools=[send_email],
-    prompt="""You are an email assistant.
+    system_prompt="""You are an email assistant.
     
 Compose professional emails based on requests.
 Extract recipient information and craft appropriate subject lines and body text.
 Always confirm what was sent.""",
 )
 
-slack_agent = create_react_agent(
-    model,
+slack_agent = create_agent(
+    model=model,
     tools=[send_slack_message],
-    prompt="""You are a Slack messaging assistant.
+    system_prompt="""You are a Slack messaging assistant.
     
 Send messages to Slack channels based on requests.
 Keep messages concise and professional.
@@ -127,10 +131,10 @@ Always confirm what was sent.""",
 )
 
 # Scheduling Team Agents
-calendar_agent = create_react_agent(
-    model,
+calendar_agent = create_agent(
+    model=model,
     tools=[create_calendar_event],
-    prompt="""You are a calendar scheduling assistant.
+    system_prompt="""You are a calendar scheduling assistant.
     
 Parse scheduling requests and create calendar events.
 Extract date, time, duration, and attendees from natural language.
@@ -143,10 +147,10 @@ IMPORTANT: Make reasonable defaults if information is missing:
 Always confirm what was scheduled with the defaults you used.""",
 )
 
-meeting_agent = create_react_agent(
-    model,
+meeting_agent = create_agent(
+    model=model,
     tools=[schedule_meeting_room],
-    prompt="""You are a meeting room booking assistant.
+    system_prompt="""You are a meeting room booking assistant.
     
 Reserve meeting rooms based on requests.
 Extract room preferences, time, and duration.

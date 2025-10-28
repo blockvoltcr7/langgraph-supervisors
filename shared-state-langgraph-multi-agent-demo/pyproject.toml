@@ -1,15 +1,15 @@
 [project]
 name = "shared-state-langgraph-multi-agent-demo"
 version = "0.1.0"
-description = "Multi-agent collaboration with shared state pattern using LangGraph"
+description = "Multi-agent collaboration with shared state pattern using LangGraph v1"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "langgraph>=0.2.58",
-    "langchain-openai>=0.3.0",
-    "langchain-core>=0.3.64",
-    "langchain-community>=0.3.0",
+    "langgraph>=1.0.1",                       # LangGraph v1
+    "langchain>=1.0.0",                       # LangChain v1 with create_agent
+    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1",                # OpenAI integration
     "python-dotenv>=1.0.0",
-    "tavily-python>=0.5.0",
-    "langgraph-cli[inmem]>=0.1.0",
+    "tavily-python>=0.5.0",                   # Web search tool
+    "langgraph-cli[inmem]>=0.4.4",            # LangGraph Studio support
 ]

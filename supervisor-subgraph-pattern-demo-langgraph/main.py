@@ -1,5 +1,5 @@
 """
-Customer Support System with Subgraphs - LangGraph Demo
+Customer Support System with Subgraphs - LangGraph v1 Demo
 
 This demonstrates subgraph patterns with:
 - Technical Support Team (subgraph with isolated memory)
@@ -14,6 +14,10 @@ Key Features:
 
 Use Case: Customer support tickets are routed to specialized teams.
 Each team maintains their own context without seeing other teams' conversations.
+
+Updated for LangGraph v1 / LangChain v1:
+- Using create_agent instead of create_react_agent
+- Using system_prompt parameter instead of prompt
 """
 
 import os
@@ -27,7 +31,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent  # LangChain v1
 from langgraph.checkpoint.memory import MemorySaver
 
 # ============================================================================
@@ -143,10 +147,10 @@ def create_tech_support_subgraph():
     """Create technical support team as a subgraph with isolated memory"""
     
     # Create specialized agent for technical support
-    tech_agent = create_react_agent(
-        model,
+    tech_agent = create_agent(
+        model=model,
         tools=[check_system_status, create_bug_ticket, search_knowledge_base],
-        prompt="""You are a Technical Support Specialist.
+        system_prompt="""You are a Technical Support Specialist.
 
 Your responsibilities:
 - Diagnose technical issues
@@ -198,10 +202,10 @@ def create_billing_subgraph():
     """Create billing team as a subgraph with isolated memory"""
     
     # Create specialized agent for billing
-    billing_agent = create_react_agent(
-        model,
+    billing_agent = create_agent(
+        model=model,
         tools=[lookup_invoice, process_refund, update_subscription],
-        prompt="""You are a Billing Support Specialist.
+        system_prompt="""You are a Billing Support Specialist.
 
 Your responsibilities:
 - Look up customer invoices and payment history

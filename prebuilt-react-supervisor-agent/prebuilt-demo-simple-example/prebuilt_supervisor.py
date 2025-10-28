@@ -1,5 +1,5 @@
 """
-Prebuilt Supervisor Example using create_supervisor
+Prebuilt Supervisor Example using create_supervisor (LangGraph v1)
 
 This demonstrates the EASY way to create a supervisor multi-agent system.
 Just 50 lines of code vs 400+ lines manual!
@@ -8,6 +8,10 @@ Use Case: Travel Booking Assistant
 - Flight booking agent
 - Hotel booking agent  
 - Supervisor coordinates them
+
+Updated for LangGraph v1 / LangChain v1:
+- Using create_agent instead of create_react_agent
+- Using system_prompt parameter instead of prompt
 """
 
 import os
@@ -16,7 +20,7 @@ from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent  # LangChain v1
 from langgraph_supervisor import create_supervisor
 
 # Load environment
@@ -52,22 +56,25 @@ def search_hotels(location: str) -> str:
     return f"🔍 Found 3 hotels in {location}: Marriott, Hilton, Hyatt"
 
 # ============================================================================
-# Create Agents using create_react_agent (Prebuilt Helper #1)
+# Create Agents using create_agent (LangChain v1)
 # ============================================================================
 
+# Initialize model
+model = ChatOpenAI(model="gpt-4o-mini", api_key=OPENAI_API_KEY)
+
 # Flight agent - handles all flight-related tasks
-flight_agent = create_react_agent(
-    model="openai:gpt-4o-mini",
+flight_agent = create_agent(
+    model=model,
     tools=[book_flight, search_flights],
-    prompt="You are a flight booking specialist. Help users search and book flights.",
+    system_prompt="You are a flight booking specialist. Help users search and book flights.",
     name="flight_assistant"  # IMPORTANT: Name is required for supervisor
 )
 
 # Hotel agent - handles all hotel-related tasks
-hotel_agent = create_react_agent(
-    model="openai:gpt-4o-mini",
+hotel_agent = create_agent(
+    model=model,
     tools=[book_hotel, search_hotels],
-    prompt="You are a hotel booking specialist. Help users search and book hotels.",
+    system_prompt="You are a hotel booking specialist. Help users search and book hotels.",
     name="hotel_assistant"  # IMPORTANT: Name is required for supervisor
 )
 

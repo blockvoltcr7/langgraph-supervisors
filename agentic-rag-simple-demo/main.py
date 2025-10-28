@@ -335,9 +335,9 @@ Be concise and helpful!"""
     builder.add_edge(START, "agent")
     builder.add_edge("agent", END)
     
-    # Compile with checkpointer
-    checkpointer = MemorySaver()
-    return builder.compile(checkpointer=checkpointer)
+    # Compile without checkpointer for LangGraph API
+    # LangGraph API provides persistence automatically
+    return builder.compile()
 
 # Export for LangGraph server
 graph = create_agentic_rag()

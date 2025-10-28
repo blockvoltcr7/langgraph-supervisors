@@ -1,0 +1,15 @@
+[project]
+name = "sales-qualification-langgraph-supabase"
+version = "1.0.0"
+description = "Sales qualification workflow with LangGraph and Supabase persistence (no FastAPI)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=1.0.1",                       # LangGraph v1
+    "langgraph-checkpoint-postgres>=2.0.3,<3.0.0",   # PostgreSQL/Supabase persistence (v2.x works, v3.0.0 has issues)
+    "langchain>=1.0.0",                       # LangChain v1
+    "langchain-core>=1.0.0,<2.0.0",           # Core components (required by langchain v1)
+    "langchain-openai>=1.0.1",                # OpenAI integration
+    "python-dotenv>=1.0.0",                   # Environment variables
+    "psycopg>=3.1.0",                         # PostgreSQL adapter (required by langgraph-checkpoint-postgres)
+]

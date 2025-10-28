@@ -1,5 +1,5 @@
 """
-Multi-Agent Collaboration with Shared State Pattern
+Multi-Agent Collaboration with Shared State Pattern (LangGraph v1)
 
 This demonstrates how multiple agents collaborate by sharing and building upon
 a common state object. Each agent contributes their specialized knowledge to
@@ -23,6 +23,10 @@ Shared State Flow:
     2. Analysis Agent → Reads web_results, adds analysis to state
     3. Report Agent → Reads analysis, adds final_report to state
     4. Supervisor → Sees all completed, returns result
+
+Updated for LangGraph v1 / LangChain v1:
+- Using create_agent instead of create_react_agent
+- Using system_prompt parameter instead of prompt
 """
 
 import os
@@ -38,7 +42,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent  # LangChain v1
 import requests
 import json
 
@@ -259,10 +263,10 @@ def web_search(query: str) -> str:
 # ============================================================================
 
 # Research Agent - Gathers information from the web
-research_agent = create_react_agent(
-    model,
+research_agent = create_agent(
+    model=model,
     tools=[web_search],
-    prompt="""You are a Research Agent specialized in web research.
+    system_prompt="""You are a Research Agent specialized in web research.
 
 Your job:
 1. Use the web_search tool to find relevant information about the user's query
